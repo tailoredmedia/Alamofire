@@ -177,7 +177,7 @@ public class Request {
             let (responseObject: AnyObject?, serializationError: NSError?) = serializer(self.request, self.response, self.delegate.data)
 
             dispatch_async(queue ?? dispatch_get_main_queue()) {
-                completionHandler(self.request, self.response, responseObject, self.delegate.error ?? serializationError)
+                completionHandler(self.request, self.response, responseObject, serializationError ?? self.delegate.error)
             }
         }
 
