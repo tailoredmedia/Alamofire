@@ -42,7 +42,9 @@ extension Request {
         delegate.queue.addOperationWithBlock {
             if self.response != nil && self.delegate.error == nil {
                 if !validation(self.request, self.response!) {
-                    self.delegate.error = NSError(domain: AlamofireErrorDomain, code: -1, userInfo: nil)
+                    let statusCode = self.response!.statusCode
+                    let errorString = NSHTTPURLResponse.localizedStringForStatusCode(statusCode)
+                    self.delegate.error = NSError(domain: AlamofireErrorDomain, code: self.response!.statusCode, userInfo: [NSLocalizedDescriptionKey : errorString, NSLocalizedFailureReasonErrorKey : errorString])
                 }
             }
         }
