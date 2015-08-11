@@ -24,6 +24,120 @@ import Alamofire
 import Foundation
 import XCTest
 
+class UploadFileInitializationTestCase: BaseTestCase {
+    func testUploadClassMethodWithMethodURLAndFile() {
+        // Given
+        let URLString = "http://httpbin.org/"
+        let imageURL = URLForResource("rainbow", withExtension: "jpg")
+
+        // When
+        let request = Alamofire.upload(.POST, URLString, file: imageURL)
+
+        // Then
+        XCTAssertNotNil(request.request, "request should not be nil")
+        XCTAssertEqual(request.request.HTTPMethod ?? "", "POST", "request HTTP method should be POST")
+        XCTAssertEqual(request.request.URL!, NSURL(string: URLString)!, "request URL should be equal")
+        XCTAssertNil(request.response, "response should be nil")
+    }
+
+    func testUploadClassMethodWithMethodURLHeadersAndFile() {
+        // Given
+        let URLString = "http://httpbin.org/"
+        let imageURL = URLForResource("rainbow", withExtension: "jpg")
+
+        // When
+        let request = Alamofire.upload(.POST, URLString, headers: ["Authorization": "123456"], file: imageURL)
+
+        // Then
+        XCTAssertNotNil(request.request, "request should not be nil")
+        XCTAssertEqual(request.request.HTTPMethod ?? "", "POST", "request HTTP method should be POST")
+        XCTAssertEqual(request.request.URL!, NSURL(string: URLString)!, "request URL should be equal")
+
+        let authorizationHeader = request.request.valueForHTTPHeaderField("Authorization") ?? ""
+        XCTAssertEqual(authorizationHeader, "123456", "Authorization header is incorrect")
+
+        XCTAssertNil(request.response, "response should be nil")
+    }
+}
+
+// MARK: -
+
+class UploadDataInitializationTestCase: BaseTestCase {
+    func testUploadClassMethodWithMethodURLAndData() {
+        // Given
+        let URLString = "http://httpbin.org/"
+
+        // When
+        let request = Alamofire.upload(.POST, URLString, data: NSData())
+
+        // Then
+        XCTAssertNotNil(request.request, "request should not be nil")
+        XCTAssertEqual(request.request.HTTPMethod ?? "", "POST", "request HTTP method should be POST")
+        XCTAssertEqual(request.request.URL!, NSURL(string: URLString)!, "request URL should be equal")
+        XCTAssertNil(request.response, "response should be nil")
+    }
+
+    func testUploadClassMethodWithMethodURLHeadersAndData() {
+        // Given
+        let URLString = "http://httpbin.org/"
+
+        // When
+        let request = Alamofire.upload(.POST, URLString, headers: ["Authorization": "123456"], data: NSData())
+
+        // Then
+        XCTAssertNotNil(request.request, "request should not be nil")
+        XCTAssertEqual(request.request.HTTPMethod ?? "", "POST", "request HTTP method should be POST")
+        XCTAssertEqual(request.request.URL!, NSURL(string: URLString)!, "request URL should be equal")
+
+        let authorizationHeader = request.request.valueForHTTPHeaderField("Authorization") ?? ""
+        XCTAssertEqual(authorizationHeader, "123456", "Authorization header is incorrect")
+
+        XCTAssertNil(request.response, "response should be nil")
+    }
+}
+
+// MARK: -
+
+class UploadStreamInitializationTestCase: BaseTestCase {
+    func testUploadClassMethodWithMethodURLAndStream() {
+        // Given
+        let URLString = "http://httpbin.org/"
+        let imageURL = URLForResource("rainbow", withExtension: "jpg")
+        let imageStream = NSInputStream(URL: imageURL)!
+
+        // When
+        let request = Alamofire.upload(.POST, URLString, stream: imageStream)
+
+        // Then
+        XCTAssertNotNil(request.request, "request should not be nil")
+        XCTAssertEqual(request.request.HTTPMethod ?? "", "POST", "request HTTP method should be POST")
+        XCTAssertEqual(request.request.URL!, NSURL(string: URLString)!, "request URL should be equal")
+        XCTAssertNil(request.response, "response should be nil")
+    }
+
+    func testUploadClassMethodWithMethodURLHeadersAndStream() {
+        // Given
+        let URLString = "http://httpbin.org/"
+        let imageURL = URLForResource("rainbow", withExtension: "jpg")
+        let imageStream = NSInputStream(URL: imageURL)!
+
+        // When
+        let request = Alamofire.upload(.POST, URLString, headers: ["Authorization": "123456"], stream: imageStream)
+
+        // Then
+        XCTAssertNotNil(request.request, "request should not be nil")
+        XCTAssertEqual(request.request.HTTPMethod ?? "", "POST", "request HTTP method should be POST")
+        XCTAssertEqual(request.request.URL!, NSURL(string: URLString)!, "request URL should be equal")
+
+        let authorizationHeader = request.request.valueForHTTPHeaderField("Authorization") ?? ""
+        XCTAssertEqual(authorizationHeader, "123456", "Authorization header is incorrect")
+
+        XCTAssertNil(request.response, "response should be nil")
+    }
+}
+
+// MARK: -
+
 class UploadDataTestCase: BaseTestCase {
     func testUploadDataRequest() {
         // Given
@@ -37,16 +151,16 @@ class UploadDataTestCase: BaseTestCase {
         var error: NSError?
 
         // When
-        Alamofire.upload(.POST, URLString, data)
+        Alamofire.upload(.POST, URLString, data: data)
             .response { responseRequest, responseResponse, _, responseError in
                 request = responseRequest
                 response = responseResponse
                 error = responseError
 
                 expectation.fulfill()
-        }
+            }
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(request, "request should not be nil")
@@ -72,11 +186,11 @@ class UploadDataTestCase: BaseTestCase {
         var progressValues: [(completedUnitCount: Int64, totalUnitCount: Int64)] = []
         var responseRequest: NSURLRequest?
         var responseResponse: NSHTTPURLResponse?
-        var responseData: AnyObject?
+        var responseData: NSData?
         var responseError: NSError?
 
         // When
-        let upload = Alamofire.upload(.POST, URLString, data)
+        let upload = Alamofire.upload(.POST, URLString, data: data)
         upload.progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
             let bytes = (bytes: bytesWritten, totalBytes: totalBytesWritten, totalBytesExpected: totalBytesExpectedToWrite)
             byteValues.append(bytes)
@@ -93,7 +207,7 @@ class UploadDataTestCase: BaseTestCase {
             expectation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(responseRequest, "response request should not be nil")
@@ -145,7 +259,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
         var formData: MultipartFormData?
         var request: NSURLRequest?
         var response: NSHTTPURLResponse?
-        var data: AnyObject?
+        var data: NSData?
         var error: NSError?
 
         // When
@@ -173,7 +287,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
             }
         )
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(request, "request should not be nil")
@@ -202,7 +316,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
 
         var request: NSURLRequest?
         var response: NSHTTPURLResponse?
-        var data: AnyObject?
+        var data: NSData?
         var error: NSError?
 
         // When
@@ -230,7 +344,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
             }
         )
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(request, "request should not be nil")
@@ -281,7 +395,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
             }
         )
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(streamingFromDisk, "streaming from disk should not be nil")
@@ -326,7 +440,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
             }
         )
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(streamingFromDisk, "streaming from disk should not be nil")
@@ -381,7 +495,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
             }
         )
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(streamingFromDisk, "streaming from disk should not be nil")
@@ -431,7 +545,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
             }
         )
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(streamingFromDisk, "streaming from disk should not be nil")
@@ -479,7 +593,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
         var progressValues: [(completedUnitCount: Int64, totalUnitCount: Int64)] = []
         var request: NSURLRequest?
         var response: NSHTTPURLResponse?
-        var data: AnyObject?
+        var data: NSData?
         var error: NSError?
 
         // When
@@ -515,7 +629,7 @@ class UploadMultipartFormDataTestCase: BaseTestCase {
             }
         )
 
-        waitForExpectationsWithTimeout(self.defaultTimeout, handler: nil)
+        waitForExpectationsWithTimeout(defaultTimeout, handler: nil)
 
         // Then
         XCTAssertNotNil(request, "request should not be nil")
