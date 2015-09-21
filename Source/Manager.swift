@@ -421,9 +421,8 @@ public class Manager {
             - parameter error:   If an error occurred, an error object indicating how the transfer failed, otherwise nil.
         */
         public func URLSession(session: NSURLSession, task: NSURLSessionTask, didCompleteWithError error: NSError?) {
-            if let taskDidComplete = taskDidComplete {
-                taskDidComplete(session, task, error)
-            } else if let delegate = self[task] {
+            taskDidComplete?(session, task, error)
+            if let delegate = self[task] {
                 delegate.URLSession(session, task: task, didCompleteWithError: error)
             }
 
