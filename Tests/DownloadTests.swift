@@ -77,7 +77,7 @@ class DownloadResponseTestCase: BaseTestCase {
     }()
 
     var randomCachesFileURL: NSURL {
-        return cachesURL.URLByAppendingPathComponent("\(NSUUID().UUIDString).json")
+        return cachesURL.URLByAppendingPathComponent("\(NSUUID().UUIDString).json")!
     }
 
     func testDownloadRequest() {
@@ -180,7 +180,7 @@ class DownloadResponseTestCase: BaseTestCase {
 
         // When
         let download = Alamofire.download(.GET, URLString) { _, _ in
-            return fileURL
+            return fileURL!
         }
         download.progress { bytesRead, totalBytesRead, totalBytesExpectedToRead in
             let bytes = (bytes: bytesRead, totalBytes: totalBytesRead, totalBytesExpected: totalBytesExpectedToRead)
@@ -248,7 +248,7 @@ class DownloadResponseTestCase: BaseTestCase {
         }
 
         do {
-            try fileManager.removeItemAtURL(fileURL)
+            try fileManager.removeItemAtURL(fileURL!)
         } catch {
             XCTFail("file manager should remove item at URL: \(fileURL)")
         }
